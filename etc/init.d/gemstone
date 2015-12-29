@@ -1,0 +1,37 @@
+#!/bin/bash
+# Gemstone manager
+# chkconfig: 345 96 01
+# description: This is an init file for starting and stoping all stones. Monit is 98, so we want to start before.
+# processname: Gemstone manager
+
+case "$1" in
+
+start)
+		# Below line could actually be done by "gslist -c" but for some reason it didn't work for us 
+		find /opt/gemstone/locks/ -type f -not -name 'gemstone.hostid' -delete
+		printf "%-50s" "Starting nr_prod..."
+		su --login ubuntu --command "/opt/git/GsDevKit_home/bin/startStone -b nr_prod"
+		
+	;;
+status)
+	# Ideally, we could do something like: /opt/gemstone/product/bin/gslist -lcv
+	# But we cannot rely on /opt/gemstone/product becuase GemStone installation can be elsewhere
+	# and even more, we can have multiple gemstone installations in different paths
+;;
+stop)
+        printf "%-50s" "Stopping nr_prod"
+		su --login ubuntu --command "/opt/git/GsDevKit_home/bin/stopStone -b nr_prod"
+;;
+
+restart)
+        $0 stop
+        $0 start
+;;
+
+*)
+        echo "Usage: $0 {status|start|stop|restart}"
+        exit 1
+esac
+
+exit 0
+
